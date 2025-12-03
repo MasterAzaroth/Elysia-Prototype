@@ -1,0 +1,68 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { BookOpenText, ChartPie, ListTree, CircleUser, Plus, Hamburger, Dumbbell } from "lucide-react";
+
+export default function Nav() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="absolute bottom-0 left-0 w-full z-50 pointer-events-none">
+      <div className="relative w-full h-20 bg-neutral-900 border-t border-white/10 pointer-events-auto flex items-center justify-between px-6 pb-2">
+
+        <Link
+          className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors group"
+          href="/dictionary"
+        >
+          <BookOpenText className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
+          <span className="text-[10px] font-medium">Learning</span>
+        </Link>
+
+        <button className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors mr-6 group">
+          <ChartPie className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
+          <span className="text-[10px] font-medium">Analytics</span>
+        </button>
+
+        <div className="absolute left-1/2 -translate-x-1/2 -top-8">
+          <button
+            onClick={() => setIsOpen((prev) => !prev)}
+            className={`
+              w-16 h-16 rounded-full flex items-center justify-center shadow-lg 
+              hover:scale-105 transition-transform active:scale-95 pointer-events-auto
+              ${isOpen ? "bg-brand-purple2" : "bg-brand-purple1"}
+            `}
+          >
+            <Plus className="w-8 h-8" strokeWidth={3} />
+          </button>
+
+          {isOpen && (
+            <div className="absolute left-1/2 -translate-x-1/2 -top-40 w-64 h-32 rounded-3xl bg-brand-purple1 border border-white/10 p-3 shadow-xl pointer-events-auto flex p-4 gap-4">
+              <Link className="w-1/2 h-full bg-brand-purple2 rounded-3xl flex flex-col justify-center items-center text-lg9" onClick={() => setIsOpen(false)} href="/trackingNutrition">
+                <Hamburger className="w-8 h-8 mb-2" />
+                <p>Nutrition</p>
+              </Link>
+              <Link className="w-1/2 h-full bg-brand-purple2 rounded-3xl flex flex-col justify-center items-center text-lg" onClick={() => setIsOpen(false)} href="/trackingTraining">
+                <Dumbbell className="w-8 h-8 mb-2" />
+                <p>Training</p>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        <Link
+          className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors ml-6 group"
+          href="/overviewNutrition"
+        >
+          <ListTree className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
+          <span className="text-[10px] font-medium">Data Logs</span>
+        </Link>
+
+        <button className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors group">
+          <CircleUser className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
+          <span className="text-[10px] font-medium">Profile</span>
+        </button>
+      </div>
+    </div>
+  );
+}
