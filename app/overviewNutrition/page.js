@@ -35,7 +35,7 @@ export default function OverviewNutrition() {
 
 
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 (Sun) - 6 (Sat)
+  const dayOfWeek = today.getDay();
   const offsetToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
   const initialMonday = new Date(today);

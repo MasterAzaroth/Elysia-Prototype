@@ -1,4 +1,3 @@
-// models/foodLog.js
 import mongoose from "mongoose";
 
 const FoodLogSchema = new mongoose.Schema(
