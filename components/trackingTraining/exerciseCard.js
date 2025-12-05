@@ -5,7 +5,9 @@ import { Plus, Check } from "lucide-react";
 
 export default function ExerciseCard({
   title = "Exercise Name",
+  muscle = "",
   imageSrc = "/Muscle/Upper%20Body/Chest.png",
+  onConfirm,
 }) {
   const [sets, setSets] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -21,7 +23,6 @@ export default function ExerciseCard({
     val = val.replace(/\D/g, "");
 
     if (val.length > 2) val = val.slice(0, 2);
-
     if (Number(val) > 99) val = "99";
 
     setSets(val);
@@ -29,7 +30,20 @@ export default function ExerciseCard({
 
   function handleConfirm() {
     if (sets === "") return;
+
+    const setsCount = Number(sets);
+    if (!setsCount || setsCount <= 0) return;
+
     setConfirmed(true);
+
+    if (onConfirm) {
+      onConfirm({
+        title,
+        muscle,
+        imageSrc,
+        setsCount,
+      });
+    }
   }
 
   return (
@@ -37,12 +51,14 @@ export default function ExerciseCard({
       <img
         src={imageSrc}
         alt={title}
-
         className="w-16 h-16 mr-4 object-contain"
       />
 
       <div className="flex flex-col justify-center mr-4">
         <p className="text-lg font-semibold text-white">{title}</p>
+        {muscle && (
+          <p className="text-xs text-brand-grey4 mt-1">{muscle}</p>
+        )}
       </div>
 
       <div className="w-auto h-10 flex items-center rounded-full ml-auto bg-transparent border-2 border-brand-purple1 self-center gap-2">
@@ -62,7 +78,7 @@ export default function ExerciseCard({
         <button
           type="button"
           onClick={handleConfirm}
-          className="h-full aspect-square rounded-full bg-brand-purple1 flex items-center justify-center text-white cursor-pointer transition"
+          className="h-full aspect-square rounded-full bg-brand-purple1 flex items-center justify-center text-white cursor-pointer transition active:scale-95"
         >
           {confirmed ? (
             <Check size={18} strokeWidth={2.5} />

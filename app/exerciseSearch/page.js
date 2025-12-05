@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Search from "@/components/global/search.js";
 import ExerciseCard from "@/components/trackingTraining/exerciseCard.js";
+
+const CURRENT_KEY = "elysia_current_workout";
 
 function resolveMuscleImage(muscleRaw) {
   if (!muscleRaw) return "/Muscle/Upper%20Body/Chest.png";
@@ -10,7 +13,6 @@ function resolveMuscleImage(muscleRaw) {
   const muscle = muscleRaw.toLowerCase();
 
   switch (muscle) {
-
     case "abductors":
       return "/Muscle/Lower%20Body/Abductors.png";
     case "adductors":
@@ -77,6 +79,11 @@ export default function ExerciseSearchPage() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const insertIndexRaw = searchParams.get("insertIndex");
+  const insertIndex = insertIndexRaw !== null ? Number(insertIndexRaw) : null;
 
   useEffect(() => {
     async function fetchExercises() {
@@ -87,7 +94,6 @@ export default function ExerciseSearchPage() {
         }
 
         const data = await res.json();
-
         setExercises(data);
       } catch (err) {
         console.error(err);
@@ -112,10 +118,74 @@ export default function ExerciseSearchPage() {
     });
   }, [exercises, searchQuery]);
 
+  function handleExerciseConfirm({ title, muscle, imageSrc, setsCount }) {
+    if (!setsCount) return;
+
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem(CURRENT_KEY);
+
+      let titleFromStorage = "";
+      let currentExercises = [];
+
+      try {
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            currentExercises = parsed;
+          } else if (parsed && typeof parsed === "object") {
+            titleFromStorage = parsed.title || "";
+            if (Array.isArray(parsed.exercises)) {
+              currentExercises = parsed.exercises;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to parse existing workout:", err);
+      }
+
+      const sets = Array.from({ length: setsCount }, (_, i) => ({
+        id: i + 1,
+        type: "Working Set",
+        weight: "",
+        reps: "",
+      }));
+
+      const newEntry = {
+        id:
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : String(Date.now()),
+        title,
+        muscle,
+        imageSrc,
+        sets,
+      };
+
+      if (
+        typeof insertIndex === "number" &&
+        Number.isFinite(insertIndex) &&
+        insertIndex >= 0 &&
+        insertIndex <= currentExercises.length
+      ) {
+        currentExercises.splice(insertIndex, 0, newEntry);
+      } else {
+        currentExercises.push(newEntry);
+      }
+
+      const payload = {
+        title: titleFromStorage,
+        exercises: currentExercises,
+      };
+
+      window.localStorage.setItem(CURRENT_KEY, JSON.stringify(payload));
+    }
+
+    router.push("/trackingTraining");
+  }
+
   return (
     <div className="w-full h-full">
       <main className="w-full h-full flex flex-col">
-
         <div className="flex flex-col mb-6 shrink-0">
           <Search
             value={searchQuery}
@@ -150,13 +220,16 @@ export default function ExerciseSearchPage() {
 
               {filteredExercises.map((exercise) => {
                 const title = exercise.Exercise || "Unknown Exercise";
-                const imageSrc = resolveMuscleImage(exercise.Muscle);
+                const muscle = exercise.Muscle || "";
+                const imageSrc = resolveMuscleImage(muscle);
 
                 return (
                   <ExerciseCard
                     key={exercise._id}
                     title={title}
+                    muscle={muscle}
                     imageSrc={imageSrc}
+                    onConfirm={handleExerciseConfirm}
                   />
                 );
               })}
