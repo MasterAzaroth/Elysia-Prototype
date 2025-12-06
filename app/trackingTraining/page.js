@@ -12,14 +12,14 @@ export default function TrackingTrainingPage() {
   const [workoutTitle, setWorkoutTitle] = useState("");
   const [exercises, setExercises] = useState([]);
 
-  const [isLoaded, setIsLoaded] = useState(false); 
+  const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const stored = window.localStorage.getItem(CURRENT_KEY);
-    
+
     if (!stored) {
       setIsLoaded(true);
       return;
@@ -32,15 +32,21 @@ export default function TrackingTrainingPage() {
       let exArray = [];
 
       if (Array.isArray(parsed)) {
+
         exArray = parsed;
       } else if (parsed && typeof parsed === "object") {
+
         title = parsed.title || "";
         exArray = Array.isArray(parsed.exercises) ? parsed.exercises : [];
       }
 
       const normalized = exArray.map((ex) => {
         const base = {
-          id: ex.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+          id:
+            ex.id ||
+            (typeof crypto !== "undefined" && crypto.randomUUID
+              ? crypto.randomUUID()
+              : String(Date.now() + Math.random())),
           title: ex.title || "",
           muscle: ex.muscle || "",
           imageSrc: ex.imageSrc || "/Muscle/Upper%20Body/Chest.png",
@@ -49,14 +55,21 @@ export default function TrackingTrainingPage() {
         if (Array.isArray(ex.sets) && ex.sets.length > 0) {
           const normalizedSets = ex.sets.map((s, idx) => ({
             id: s.id ?? idx + 1,
-            type: s.type === "Warm-Up Set" || s.type === "Working Set" ? s.type : "Working Set",
+            type:
+              s.type === "Warm-Up Set" || s.type === "Working Set"
+                ? s.type
+                : "Working Set",
             weight: s.weight ?? "",
             reps: s.reps ?? "",
           }));
           return { ...base, sets: normalizedSets };
         }
 
-        const count = typeof ex.setsCount === "number" && ex.setsCount > 0 ? ex.setsCount : 1;
+        const count =
+          typeof ex.setsCount === "number" && ex.setsCount > 0
+            ? ex.setsCount
+            : 1;
+
         const sets = Array.from({ length: count }, (_, i) => ({
           id: i + 1,
           type: "Working Set",
@@ -78,8 +91,7 @@ export default function TrackingTrainingPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
-    if (!isLoaded) return; 
+    if (!isLoaded) return;
 
     const payload = {
       title: workoutTitle,
@@ -90,7 +102,7 @@ export default function TrackingTrainingPage() {
   }, [workoutTitle, exercises, isLoaded]);
 
   function openExerciseSearch(insertIndex) {
-    const base = "/exerciseSearch"; 
+    const base = "/exerciseSearch";
 
     if (
       typeof insertIndex === "number" &&
@@ -136,7 +148,7 @@ export default function TrackingTrainingPage() {
 
   function handleDeleteSet(exerciseId, setId) {
     updateExercise(exerciseId, (ex) => {
-      if (!ex.sets || ex.sets.length <= 1) return ex; 
+      if (!ex.sets || ex.sets.length <= 1) return ex;
       return {
         ...ex,
         sets: ex.sets.filter((s) => s.id !== setId),
@@ -153,7 +165,7 @@ export default function TrackingTrainingPage() {
     }));
   }
 
-  function handleSaveWorkout() {
+  async function handleSaveWorkout() {
     if (exercises.length === 0) return;
     if (typeof window === "undefined") return;
 
@@ -164,6 +176,7 @@ export default function TrackingTrainingPage() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) list = parsed;
       } catch {
+
       }
     }
 
@@ -180,7 +193,38 @@ export default function TrackingTrainingPage() {
     list.push(workout);
     window.localStorage.setItem(SAVED_KEY, JSON.stringify(list));
 
-    console.log("Workout saved:", workout);
+    console.log("Workout saved to localStorage:", workout);
+
+    try {
+      const res = await fetch("/api/exerciseLogs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          workoutTitle: workout.title,
+          date: workout.date,
+          exercises: workout.exercises,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Failed to save workout to DB:", err);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Workout saved to DB:", data);
+
+      window.localStorage.removeItem(CURRENT_KEY);
+      setWorkoutTitle("");
+      setExercises([]);
+
+      router.push("/overviewTraining");
+    } catch (err) {
+      console.error("Error while saving workout to DB:", err);
+    }
   }
 
   return (
@@ -229,6 +273,7 @@ export default function TrackingTrainingPage() {
 
         {exercises.length > 0 && (
           <div className="w-full flex flex-col gap-4">
+
             <div className="w-full flex items-center mb-2">
               <div className="flex-1 h-[1px] bg-brand-purple1" />
               <button
@@ -243,7 +288,6 @@ export default function TrackingTrainingPage() {
 
             {exercises.map((ex, index) => (
               <div key={ex.id} className="w-full flex flex-col gap-2">
-
                 <TrackingTrainingCard
                   title={ex.title}
                   muscle={ex.muscle}
