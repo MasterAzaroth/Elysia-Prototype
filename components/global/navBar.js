@@ -19,10 +19,13 @@ export default function Nav() {
           <span className="text-[10px] font-medium">Learning</span>
         </Link>
 
-        <button className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors mr-6 group">
+        <Link
+          className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors group"
+          href="/dashboard"
+        >
           <ChartPie className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
           <span className="text-[10px] font-medium">Analytics</span>
-        </button>
+        </Link>
 
         <div className="absolute left-1/2 -translate-x-1/2 -top-8">
           <button

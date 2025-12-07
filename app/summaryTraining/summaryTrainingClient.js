@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Trash2, Lock } from "lucide-react";
 
 export default function SummaryTrainingClient({ initialLog }) {
   const [log, setLog] = useState(initialLog);
@@ -20,26 +20,25 @@ export default function SummaryTrainingClient({ initialLog }) {
 
     setSaving(true);
     setError(null);
-
     setIsDirty(false);
 
     try {
-      const res = await fetch(`/api/exerciseLog/${log._id}`, {
+      const res = await fetch(`/api/exerciseLogs/${log._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ exercises: exercisesToSave }),
       });
 
       if (!res.ok) {
         let serverError = "Failed to save changes";
+
         try {
           const data = await res.json();
           if (data?.error) serverError = data.error;
           console.error("Save error details:", data);
-        } catch {
-
-        }
-
+        } catch {}
 
         setIsDirty(true);
         setError(serverError);
@@ -47,11 +46,11 @@ export default function SummaryTrainingClient({ initialLog }) {
       }
 
       const updated = await res.json();
+
       setLog((prev) => ({
         ...prev,
         exercises: updated.exercises ?? exercisesToSave,
       }));
-
     } catch (err) {
       console.error(err);
       setIsDirty(true);
@@ -64,9 +63,13 @@ export default function SummaryTrainingClient({ initialLog }) {
   function updateSet(exIndex, setIndex, field, rawValue) {
     const value =
       field === "weight"
-        ? rawValue === "" ? "" : Number(rawValue)
+        ? rawValue === ""
+          ? ""
+          : Number(rawValue)
         : field === "reps"
-        ? rawValue === "" ? "" : Number(rawValue)
+        ? rawValue === ""
+          ? ""
+          : Number(rawValue)
         : rawValue;
 
     const updatedExercises = (log.exercises || []).map((ex, i) => {
@@ -89,6 +92,7 @@ export default function SummaryTrainingClient({ initialLog }) {
       if (i !== exIndex) return ex;
 
       const updatedSets = (ex.sets || []).filter((_, j) => j !== setIndex);
+
       return { ...ex, sets: updatedSets };
     });
 
@@ -96,8 +100,18 @@ export default function SummaryTrainingClient({ initialLog }) {
     setIsDirty(true);
   }
 
+  function handleDeleteExercise(exIndex) {
+    const updatedExercises = (log.exercises || []).filter(
+      (_, i) => i !== exIndex
+    );
+
+    setLog((prev) => ({ ...prev, exercises: updatedExercises }));
+    setIsDirty(true);
+  }
+
   const saveButtonBase =
     "px-4 py-2 rounded-full border text-sm font-medium active:scale-95 transition";
+
   const saveButtonState = isDirty
     ? "bg-brand-purple1 border-brand-purple1 text-white cursor-pointer"
     : "bg-transparent border-brand-purple1 text-brand-purple1/60 cursor-not-allowed";
@@ -112,12 +126,8 @@ export default function SummaryTrainingClient({ initialLog }) {
           <p className="text-xs text-brand-grey4">{date}</p>
         </div>
 
-        {saving && (
-          <p className="text-xs text-brand-grey4">Saving…</p>
-        )}
-        {error && (
-          <p className="text-xs text-red-400">{error}</p>
-        )}
+        {saving && <p className="text-xs text-brand-grey4">Saving…</p>}
+        {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
 
       <div className="w-full h-[1px] bg-brand-grey3" />
@@ -128,6 +138,7 @@ export default function SummaryTrainingClient({ initialLog }) {
             key={`${ex.title || "exercise"}-${idx}`}
             className="w-full h-auto bg-brand-grey2 p-3 rounded-2xl flex flex-col gap-3"
           >
+
             <div className="flex mb-1 items-center gap-3">
               <img
                 src={ex.imageSrc || "/Muscle/Upper%20Body/Chest.png"}
@@ -141,6 +152,14 @@ export default function SummaryTrainingClient({ initialLog }) {
                   {ex.muscle || "—"}
                 </h3>
               </div>
+
+              <button
+                type="button"
+                onClick={() => handleDeleteExercise(idx)}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-brand-grey3 hover:bg-brand-grey4 active:scale-95 transition"
+              >
+                <Trash2 size={18} className="text-brand-grey4" />
+              </button>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -149,7 +168,6 @@ export default function SummaryTrainingClient({ initialLog }) {
                   key={setIndex}
                   className="w-full h-auto p-2 flex items-center gap-2 bg-brand-grey3 rounded-full"
                 >
-
                   <div className="w-8 h-8 rounded-full bg-brand-purple1 flex justify-center items-center">
                     <p>{setIndex + 1}</p>
                   </div>
@@ -197,10 +215,22 @@ export default function SummaryTrainingClient({ initialLog }) {
 
                   <button
                     type="button"
-                    className="ml-auto w-8 h-8 flex items-center justify-center rounded-full bg-brand-purple1 hover:opacity-80 transition"
-                    onClick={() => handleDeleteSet(idx, setIndex)}
+                    className={`ml-auto w-8 h-8 flex items-center justify-center rounded-full ${
+                      setIndex === 0
+                        ? "bg-brand-grey3 cursor-default"
+                        : "bg-brand-purple1 hover:opacity-80 transition"
+                    }`}
+                    onClick={
+                      setIndex === 0
+                        ? undefined
+                        : () => handleDeleteSet(idx, setIndex)
+                    }
                   >
-                    <Trash2 size={16} className="text-white" />
+                    {setIndex === 0 ? (
+                      <Lock size={16} className="text-brand-grey4" />
+                    ) : (
+                      <Trash2 size={16} className="text-white" />
+                    )}
                   </button>
                 </div>
               ))}
@@ -215,7 +245,6 @@ export default function SummaryTrainingClient({ initialLog }) {
         )}
 
         <div className="w-full flex justify-between mt-2 px-1">
-
           <Link
             href="/overviewTraining"
             className="px-4 py-2 rounded-full bg-brand-purple1 text-sm font-medium active:scale-95"

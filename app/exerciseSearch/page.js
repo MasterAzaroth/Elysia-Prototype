@@ -13,61 +13,36 @@ function resolveMuscleImage(muscleRaw) {
   const muscle = muscleRaw.toLowerCase();
 
   switch (muscle) {
-    case "abductors":
-      return "/Muscle/Lower%20Body/Abductors.png";
-    case "adductors":
-      return "/Muscle/Lower%20Body/Adductors.png";
-    case "calves":
-      return "/Muscle/Lower%20Body/Calves.png";
-    case "glutes":
-      return "/Muscle/Lower%20Body/Glutes.png";
-    case "hamstrings":
-      return "/Muscle/Lower%20Body/Hamstrings.png";
-    case "quads":
-      return "/Muscle/Lower%20Body/Quads.png";
-    case "tear muscle":
-      return "/Muscle/Lower%20Body/Tear%20Muscle.png";
-    case "tibialis":
-      return "/Muscle/Lower%20Body/Tibialis.png";
+    case "abductors": return "/Muscle/Lower%20Body/Abductors.png";
+    case "adductors": return "/Muscle/Lower%20Body/Adductors.png";
+    case "calves": return "/Muscle/Lower%20Body/Calves.png";
+    case "glutes": return "/Muscle/Lower%20Body/Glutes.png";
+    case "hamstrings": return "/Muscle/Lower%20Body/Hamstrings.png";
+    case "quads": return "/Muscle/Lower%20Body/Quads.png";
+    case "tear muscle": return "/Muscle/Lower%20Body/Tear%20Muscle.png";
+    case "tibialis": return "/Muscle/Lower%20Body/Tibialis.png";
 
-    case "biceps":
-      return "/Muscle/Upper%20Body/Arms/biceps.png";
-    case "forearm extensors":
-      return "/Muscle/Upper%20Body/Arms/Forearm%20Extensors.png";
-    case "forearm flexors":
-      return "/Muscle/Upper%20Body/Arms/Forearm%20Flexors.png";
-    case "triceps":
-      return "/Muscle/Upper%20Body/Arms/Triceps.png";
+    case "biceps": return "/Muscle/Upper%20Body/Arms/biceps.png";
+    case "forearm extensors": return "/Muscle/Upper%20Body/Arms/Forearm%20Extensors.png";
+    case "forearm flexors": return "/Muscle/Upper%20Body/Arms/Forearm%20Flexors.png";
+    case "triceps": return "/Muscle/Upper%20Body/Arms/Triceps.png";
 
-    case "lats":
-      return "/Muscle/Upper%20Body/Back/Lats.png";
-    case "lower back":
-      return "/Muscle/Upper%20Body/Back/Lower%20Back.png";
-    case "lower lats":
-      return "/Muscle/Upper%20Body/Back/Lower%20Lats.png";
-    case "mid back":
-      return "/Muscle/Upper%20Body/Back/Mid%20Back.png";
+    case "lats": return "/Muscle/Upper%20Body/Back/Lats.png";
+    case "lower back": return "/Muscle/Upper%20Body/Back/Lower%20Back.png";
+    case "lower lats": return "/Muscle/Upper%20Body/Back/Lower%20Lats.png";
+    case "mid back": return "/Muscle/Upper%20Body/Back/Mid%20Back.png";
 
-    case "core":
-      return "/Muscle/Upper%20Body/Core/Core.png";
-    case "lower abs":
-      return "/Muscle/Upper%20Body/Core/Lower%20Abs.png";
-    case "obliques":
-      return "/Muscle/Upper%20Body/Core/Obliques.png";
-    case "upper abs":
-      return "/Muscle/Upper%20Body/Core/Upper%20Abs.png";
+    case "core": return "/Muscle/Upper%20Body/Core/Core.png";
+    case "lower abs": return "/Muscle/Upper%20Body/Core/Lower%20Abs.png";
+    case "obliques": return "/Muscle/Upper%20Body/Core/Obliques.png";
+    case "upper abs": return "/Muscle/Upper%20Body/Core/Upper%20Abs.png";
 
-    case "rear delts":
-      return "/Muscle/Upper%20Body/Shoulders/Rear%20Delts.png";
-    case "side delts":
-      return "/Muscle/Upper%20Body/Shoulders/Side%20Delts.png";
-    case "front delts":
-      return "/Muscle/Upper%20Body/Shoulders/Side%20Delts.png";
+    case "rear delts": return "/Muscle/Upper%20Body/Shoulders/Rear%20Delts.png";
+    case "side delts": return "/Muscle/Upper%20Body/Shoulders/Side%20Delts.png";
+    case "front delts": return "/Muscle/Upper%20Body/Shoulders/Side%20Delts.png";
 
-    case "chest":
-      return "/Muscle/Upper%20Body/Chest.png";
-    case "scm":
-      return "/Muscle/Upper%20Body/SCM.png";
+    case "chest": return "/Muscle/Upper%20Body/Chest.png";
+    case "scm": return "/Muscle/Upper%20Body/SCM.png";
 
     default:
       return "/Muscle/Upper%20Body/Chest.png";
@@ -79,6 +54,7 @@ export default function ExerciseSearchPage() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -89,9 +65,7 @@ export default function ExerciseSearchPage() {
     async function fetchExercises() {
       try {
         const res = await fetch("/api/exercises");
-        if (!res.ok) {
-          throw new Error(`Failed to fetch exercises: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Failed to fetch exercises: ${res.status}`);
 
         const data = await res.json();
         setExercises(data);
@@ -130,6 +104,7 @@ export default function ExerciseSearchPage() {
       try {
         if (stored) {
           const parsed = JSON.parse(stored);
+
           if (Array.isArray(parsed)) {
             currentExercises = parsed;
           } else if (parsed && typeof parsed === "object") {

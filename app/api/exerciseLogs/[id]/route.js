@@ -4,44 +4,46 @@ import ExerciseLog from "@/models/exerciseLog";
 
 export async function PUT(req, { params }) {
   console.log("------------------------------------------");
-  console.log("🔥 PUT REQUEST RECEIVED AT /api/exerciseLog/[id]");
-  
-  try {
+  console.log("PUT REQUEST RECEIVED AT /api/exerciseLogs/[id]");
 
+  try {
     const resolvedParams = await params;
-    console.log("✅ Params resolved:", resolvedParams);
-    
+    console.log("Params resolved:", resolvedParams);
+
     const { id } = resolvedParams;
-    console.log("✅ ID extracted:", id);
+    console.log("ID extracted:", id);
 
     if (!id) {
-      console.log("❌ Error: No ID found in params");
+      console.log("Error: No ID found in params");
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
     let body;
     try {
       body = await req.json();
-      console.log("✅ Body parsed, exercise count:", body.exercises?.length);
+      console.log("Body parsed, exercise count:", body.exercises?.length);
     } catch (e) {
-      console.log("❌ Error parsing JSON body");
+      console.log("Error parsing JSON body");
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    console.log("⏳ Connecting to DB...");
+    console.log("Connecting to DB...");
     await dbConnect();
-    console.log("✅ DB Connected");
+    console.log("DB Connected");
 
-    console.log(`⏳ Attempting to update ID: ${id}`);
-    
+    console.log(`Attempting to update ID: ${id}`);
     const existing = await ExerciseLog.findById(id);
-    console.log(existing ? "✅ Document FOUND in DB" : "❌ Document NOT FOUND in DB");
+    console.log(existing ? "Document FOUND in DB" : "Document NOT FOUND in DB");
 
     if (!existing) {
-       return NextResponse.json({ error: "Workout not found in DB" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Workout not found in DB" },
+        { status: 404 }
+      );
     }
 
     const { exercises } = body;
+
     const sanitizedExercises = exercises.map((ex) => ({
       ...ex,
       sets: (ex.sets || []).map((set) => ({
@@ -58,13 +60,13 @@ export async function PUT(req, { params }) {
       { new: true }
     );
 
-    console.log("✅ Update successful");
+    console.log("Update successful");
     console.log("------------------------------------------");
-    
-    return NextResponse.json(updated, { status: 200 });
 
+    return NextResponse.json(updated, { status: 200 });
   } catch (err) {
-    console.error("❌ CRITICAL SERVER ERROR:", err);
+    console.error("CRITICAL SERVER ERROR:", err);
+
     return NextResponse.json(
       { error: "Internal Server Error", details: err.message },
       { status: 500 }

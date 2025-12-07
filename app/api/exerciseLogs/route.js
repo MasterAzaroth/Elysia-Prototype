@@ -35,14 +35,12 @@ export async function POST(req) {
     });
 
     return NextResponse.json(
-      {
-        ok: true,
-        logId: doc._id,
-      },
+      { ok: true, logId: doc._id },
       { status: 201 }
     );
   } catch (err) {
     console.error("Failed to save exercise log:", err);
+
     return NextResponse.json(
       { error: "Failed to save exercise log" },
       { status: 500 }

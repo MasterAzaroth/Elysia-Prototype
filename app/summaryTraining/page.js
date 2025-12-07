@@ -12,7 +12,10 @@ export default async function SummaryTrainingPage({ searchParams }) {
       <div className="w-full min-h-screen p-4 flex flex-col gap-4">
         <p className="text-sm text-brand-grey4">
           No workout selected. Go back to{" "}
-          <Link href="/overviewTraining" className="text-brand-purple1 underline">
+          <Link
+            href="/overviewTraining"
+            className="text-brand-purple1 underline"
+          >
             Overview
           </Link>
           .
@@ -24,6 +27,7 @@ export default async function SummaryTrainingPage({ searchParams }) {
   await dbConnect();
 
   let log = null;
+
   try {
     log = await ExerciseLog.findById(id).lean();
   } catch (error) {
@@ -35,7 +39,10 @@ export default async function SummaryTrainingPage({ searchParams }) {
       <div className="w-full min-h-screen p-4 flex flex-col gap-4">
         <p className="text-sm text-brand-grey4">
           Workout not found. Go back to{" "}
-          <Link href="/overviewTraining" className="text-brand-purple1 underline">
+          <Link
+            href="/overviewTraining"
+            className="text-brand-purple1 underline"
+          >
             Overview
           </Link>
           .
@@ -46,7 +53,5 @@ export default async function SummaryTrainingPage({ searchParams }) {
 
   const serializableLog = JSON.parse(JSON.stringify(log));
 
-  return (
-    <SummaryTrainingClient initialLog={serializableLog} />
-  );
+  return <SummaryTrainingClient initialLog={serializableLog} />;
 }
