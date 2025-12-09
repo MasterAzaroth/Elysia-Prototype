@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Nav from "../components/global/navBar.js";
+import NavWrapper from "@/components/global/navWrapper"; 
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,7 +20,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-950 flex items-center justify-center h-[100dvh] overflow-hidden`}>
         
         <div className="w-full h-full sm:w-[430px] sm:h-[932px] bg-brand-grey1 sm:border-[12px] border-purple-400 sm:rounded-[60px] overflow-hidden shadow-2xl flex flex-col relative">
@@ -29,7 +28,7 @@ export default function RootLayout({ children }) {
              {children}
           </main>
 
-          <Nav />
+          <NavWrapper />
 
         </div>
       </body>
