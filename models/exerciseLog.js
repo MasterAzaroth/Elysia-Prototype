@@ -33,6 +33,11 @@ const ExerciseSchema = new Schema(
 
 const ExerciseLogSchema = new Schema(
   {
+    userId: {
+      type: String,
+      required: true, 
+      index: true,
+    },
     workoutTitle: {
       type: String,
       required: true,
