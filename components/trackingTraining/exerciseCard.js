@@ -15,14 +15,15 @@ export default function ExerciseCard({
   function handleSetsChange(e) {
     let val = e.target.value;
 
+    val = val.replace(/\D/g, "");
+
     if (val === "") {
       setSets("");
       return;
     }
 
-    val = val.replace(/\D/g, "");
-
     if (val.length > 2) val = val.slice(0, 2);
+    
     if (Number(val) > 99) val = "99";
 
     setSets(val);
@@ -63,13 +64,14 @@ export default function ExerciseCard({
 
       <div className="w-auto h-10 flex items-center rounded-full ml-auto bg-transparent border-2 border-brand-purple1 self-center gap-2">
         <div className="w-auto flex justify-between items-center text-sm font-medium text-white">
+
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
-            min="1"
-            max="99"
             value={sets}
             onChange={handleSetsChange}
+            onClick={(e) => e.stopPropagation()}
+            placeholder="0"
             className="w-10 bg-transparent text-right outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span className="ml-2">Sets</span>

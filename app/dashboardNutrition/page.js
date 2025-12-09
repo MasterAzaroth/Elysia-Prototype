@@ -7,33 +7,7 @@ import DailyStatusCard from "@/components/dashboard/nutrition/dailyStatusCard.js
 import MealTimerCard from "@/components/dashboard/nutrition/mealTimerCard.js";
 import WeeklyAdherenceChart from "@/components/dashboard/nutrition/weeklyAdherenceChart.js";
 import MacroAdherenceCard from "@/components/dashboard/nutrition/macroAdherenceCard.js";
-
-function calculateGoals(user) {
-  if (!user) return { calorieTarget: 2000, protein: 150, carbs: 250, fat: 60 };
-
-  let bmr = 10 * user.weight + 6.25 * user.height - 5 * user.age;
-  bmr += user.gender === "male" ? 5 : -161;
-
-  const multipliers = { 1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9 };
-  let tdee = bmr * (multipliers[user.activity_level] || 1.2);
-
-  if (user.nutritional_goal === "cut") tdee -= 500;
-  else if (user.nutritional_goal === "bulk") tdee += 500;
-
-  let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
-  if (user.nutritional_preference === "high protein") {
-    pRatio = 0.4; cRatio = 0.35; fRatio = 0.25;
-  } else if (user.nutritional_preference === "high carb") {
-    pRatio = 0.25; cRatio = 0.55; fRatio = 0.2;
-  }
-
-  return {
-    calorieTarget: Math.round(tdee),
-    protein: Math.round((tdee * pRatio) / 4),
-    carbs: Math.round((tdee * cRatio) / 4),
-    fat: Math.round((tdee * fRatio) / 9),
-  };
-}
+import { calculateNutritionTargets } from "@/lib/nutritionCalculator.js";
 
 export default function DashboardNutritionPage() {
   const router = useRouter();
@@ -58,7 +32,8 @@ export default function DashboardNutritionPage() {
         const logsData = await logsRes.json();
 
         if (userData.success) {
-          const targets = calculateGoals(userData.user);
+
+          const targets = calculateNutritionTargets(userData.user);
           setData({
             user: userData.user,
             logs: Array.isArray(logsData) ? logsData : [],
@@ -82,6 +57,8 @@ export default function DashboardNutritionPage() {
       </div>
     );
   }
+
+  const safeTargets = data.targets || { calorieTarget: 2000, protein: 150, carbs: 250, fat: 60 };
 
   return (
     <div className="min-h-screen w-full bg-brand-grey1 text-white">
@@ -109,21 +86,21 @@ export default function DashboardNutritionPage() {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-1/2 aspect-auto min-h-[250px]">
-            <DailyStatusCard logs={data.logs} targets={data.targets} />
+        <div className="flex gap-4">
+          <div className="w-full md:w-1/2">
+            <DailyStatusCard logs={data.logs} targets={safeTargets} />
           </div>
-          <div className="w-full md:w-1/2 aspect-auto min-h-[250px]">
+          <div className="w-full md:w-1/2">
             <MealTimerCard logs={data.logs} />
           </div>
         </div>
 
         <div className="w-full">
-          <WeeklyAdherenceChart logs={data.logs} targets={data.targets} />
+          <WeeklyAdherenceChart logs={data.logs} targets={safeTargets} />
         </div>
 
         <div className="w-full">
-          <MacroAdherenceCard logs={data.logs} targets={data.targets} />
+          <MacroAdherenceCard logs={data.logs} targets={safeTargets} />
         </div>
       </main>
     </div>

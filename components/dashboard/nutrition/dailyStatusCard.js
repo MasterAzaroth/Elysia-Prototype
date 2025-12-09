@@ -12,14 +12,14 @@ export default function DailyStatusCard({ logs, targets }) {
   };
 
   return (
-    <div className="w-full h-full bg-brand-grey2 rounded-3xl p-4 flex flex-col justify-between">
+    <div className="w-full h-40 bg-brand-grey2 rounded-3xl p-4 flex flex-col justify-between">
 
       <div className="flex justify-center">
         <h2 className="text-lg font-semibold">Daily Status</h2>
       </div>
 
 
-      <div className="flex flex-col items-center gap-1 mt-3">
+      <div className="flex flex-col items-center gap-1">
         <div className="flex gap-2">
           <p className="text-xs text-brand-grey5">Calories</p>
           <p className="text-xs leading-none">

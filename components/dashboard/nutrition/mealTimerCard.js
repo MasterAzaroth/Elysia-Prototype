@@ -24,7 +24,7 @@ export default function MealTimerCard({ logs }) {
   }
 
   return (
-    <div className="w-full h-full bg-brand-grey2 rounded-3xl p-4 flex flex-col items-center justify-center">
+    <div className="w-full h-40 bg-brand-grey2 rounded-3xl p-4 flex flex-col items-center justify-center">
 
       <h2 className="text-lg font-semibold mb-3 text-center mb-auto">Meal Timer</h2>
 

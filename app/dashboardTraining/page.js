@@ -14,6 +14,7 @@ export default function DashboardTrainingPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     const userId = localStorage.getItem("elysia_user_id");
     if (!userId) {
       router.push("/login");

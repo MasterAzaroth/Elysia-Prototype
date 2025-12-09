@@ -40,7 +40,7 @@ export default function DashboardConsistencyPage() {
   const [data, setData] = useState({
     exerciseLogs: [],
     foodLogs: [],
-    targets: null
+    targets: calculateGoals(null)
   });
 
   useEffect(() => {
@@ -64,9 +64,29 @@ export default function DashboardConsistencyPage() {
 
         if (userData.success) {
           const targets = calculateGoals(userData.user);
+
+          const rawExercise = Array.isArray(exData) 
+            ? exData 
+            : (exData.logs || exData.data || []);
+            
+          const rawFood = Array.isArray(foodData) 
+            ? foodData 
+            : (foodData.logs || foodData.data || []);
+
+          const exerciseLogs = rawExercise.map(log => ({
+            ...log,
+            date: new Date(log.date)
+          }));
+
+          const foodLogs = rawFood.map(log => ({
+            ...log,
+
+            date: log.day ? new Date(log.day) : new Date(log.loggedAt || log.createdAt)
+          }));
+
           setData({
-            exerciseLogs: Array.isArray(exData) ? exData : [],
-            foodLogs: Array.isArray(foodData) ? foodData : [],
+            exerciseLogs,
+            foodLogs,
             targets
           });
         }
