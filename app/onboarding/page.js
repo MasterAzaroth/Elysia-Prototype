@@ -72,7 +72,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="h-screen w-full bg-brand-grey1">
+    <div className="h-full w-full bg-brand-grey1">
       {step === 0 && (
         <WelcomeCard onContinue={handleNextStep} />
       )}

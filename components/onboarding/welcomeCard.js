@@ -17,7 +17,7 @@ export default function WelcomeCard({ onContinue }) {
 
       <div className="flex flex-1 flex-col items-center justify-center px-4">
 
-        <p className="mb-20 text-center text-[18px] leading-relaxed text-brand-grey5">
+        <p className="mb-20 text-center text-lg leading-relaxed">
           Discipline shapes the body.
           <br />
           Purpose shapes the mind.
@@ -30,7 +30,7 @@ export default function WelcomeCard({ onContinue }) {
         <div className="space-y-2 text-center text-[18px] leading-relaxed">
           <p>Welcome to Elysia</p>
           <p className="text-[22px] text-brand-grey5">—</p>
-          <p className="text-brand-grey5">your space for growth.</p>
+          <p>your space for growth.</p>
         </div>
       </div>
 
