@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Search from "@/components/global/search.js";
 import ExerciseCard from "@/components/trackingTraining/exerciseCard.js";
@@ -49,7 +49,7 @@ function resolveMuscleImage(muscleRaw) {
   }
 }
 
-export default function ExerciseSearchPage() {
+function SearchContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -213,5 +213,14 @@ export default function ExerciseSearchPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ExerciseSearchPage() {
+  return (
+
+    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
