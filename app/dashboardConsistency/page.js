@@ -1,35 +1,92 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import DNav from "@/components/dashboard/dashboardNav.js";
-import dbConnect from "@/lib/mongodb.js";
-import ExerciseLog from "@/models/exerciseLog.js";
-import FoodLog from "@/models/foodLog.js";
-import UserProfile from "@/models/userProfile.js";
-
-import { calculateNutritionTargets } from "@/lib/nutritionCalculator.js";
-
 import StreakCard from "@/components/dashboard/consistency/streakCard.js";
 import LastWeekCard from "@/components/dashboard/consistency/lastWeekCard.js";
 import ConsistencyCalendar from "@/components/dashboard/consistency/consistencyCalendar.js";
 import WorkoutFrequencyChart from "@/components/dashboard/consistency/workoutFrequencyChart.js";
 
-export default async function DashboardConsistencyPage() {
-  await dbConnect();
+function calculateGoals(user) {
+  if (!user) return { calorieTarget: 2000, protein: 150, carbs: 250, fat: 60 };
+  
+  let bmr = 10 * user.weight + 6.25 * user.height - 5 * user.age;
+  bmr += user.gender === "male" ? 5 : -161;
+  const multipliers = { 1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9 };
+  let tdee = bmr * (multipliers[user.activity_level] || 1.2);
 
-  const user = await UserProfile.findOne({
-    email: "test@sample.com",
-  }).lean();
+  if (user.nutritional_goal === "cut") tdee -= 500;
+  else if (user.nutritional_goal === "bulk") tdee += 500;
 
-  const exerciseLogs = await ExerciseLog.find({})
-    .sort({ date: 1 })
-    .lean();
+  let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
+  if (user.nutritional_preference === "high protein") {
+    pRatio = 0.4; cRatio = 0.35; fRatio = 0.25;
+  } else if (user.nutritional_preference === "high carb") {
+    pRatio = 0.25; cRatio = 0.55; fRatio = 0.2;
+  }
 
-  const foodLogs = await FoodLog.find({})
-    .sort({ loggedAt: 1 })
-    .lean();
+  return {
+    calorieTarget: Math.round(tdee),
+    protein: Math.round((tdee * pRatio) / 4),
+    carbs: Math.round((tdee * cRatio) / 4),
+    fat: Math.round((tdee * fRatio) / 9),
+  };
+}
 
-  const plainExercise = JSON.parse(JSON.stringify(exerciseLogs));
-  const plainFood = JSON.parse(JSON.stringify(foodLogs));
+export default function DashboardConsistencyPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    exerciseLogs: [],
+    foodLogs: [],
+    targets: null
+  });
 
-  const targets = calculateNutritionTargets(user || {});
+  useEffect(() => {
+    const userId = localStorage.getItem("elysia_user_id");
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    async function fetchAll() {
+      try {
+        const [userRes, foodRes, exRes] = await Promise.all([
+          fetch(`/api/user/profile?userId=${userId}`),
+          fetch(`/api/foodLog?userId=${userId}`),
+          fetch(`/api/exerciseLogs?userId=${userId}`)
+        ]);
+
+        const userData = await userRes.json();
+        const foodData = await foodRes.json();
+        const exData = await exRes.json();
+
+        if (userData.success) {
+          const targets = calculateGoals(userData.user);
+          setData({
+            exerciseLogs: Array.isArray(exData) ? exData : [],
+            foodLogs: Array.isArray(foodData) ? foodData : [],
+            targets
+          });
+        }
+      } catch (err) {
+        console.error("Error loading consistency data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchAll();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-brand-grey1 flex items-center justify-center text-brand-grey5">
+        Loading Consistency Data...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-brand-grey1 text-white">
@@ -44,23 +101,23 @@ export default async function DashboardConsistencyPage() {
         </div>
 
         <StreakCard
-          exerciseLogs={plainExercise}
-          foodLogs={plainFood}
-          targets={targets}
+          exerciseLogs={data.exerciseLogs}
+          foodLogs={data.foodLogs}
+          targets={data.targets}
         />
 
         <LastWeekCard
-          exerciseLogs={plainExercise}
-          foodLogs={plainFood}
-          targets={targets}
+          exerciseLogs={data.exerciseLogs}
+          foodLogs={data.foodLogs}
+          targets={data.targets}
         />
 
-        <WorkoutFrequencyChart exerciseLogs={plainExercise} />
+        <WorkoutFrequencyChart exerciseLogs={data.exerciseLogs} />
 
         <ConsistencyCalendar
-          exerciseLogs={plainExercise}
-          foodLogs={plainFood}
-          targets={targets}
+          exerciseLogs={data.exerciseLogs}
+          foodLogs={data.foodLogs}
+          targets={data.targets}
         />
       </main>
     </div>

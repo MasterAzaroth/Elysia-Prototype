@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Search from "../../components/global/search.js";
 import FCard from "../../components/trackingNutrition/foodCard.js";
 import { Egg, Wheat, Pizza, CookingPot } from "lucide-react";
 
 export default function FoodDatabase() {
+  const router = useRouter();
+  const [userId, setUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,16 +16,21 @@ export default function FoodDatabase() {
 
   const [gramsById, setGramsById] = useState({});
 
+  useEffect(() => {
+    const storedId = localStorage.getItem("elysia_user_id");
+    if (!storedId) {
+      router.push("/login");
+      return;
+    }
+    setUserId(storedId);
+  }, [router]);
+
   function resolveFoodIcon(iconName) {
     switch (iconName) {
-      case "Egg":
-        return Egg;
-      case "Pizza":
-        return Pizza;
-      case "Wheat":
-        return Wheat;
-      default:
-        return CookingPot;
+      case "Egg": return Egg;
+      case "Pizza": return Pizza;
+      case "Wheat": return Wheat;
+      default: return CookingPot;
     }
   }
 
@@ -53,7 +61,6 @@ export default function FoodDatabase() {
 
   const filteredFoods = useMemo(() => {
     if (!searchQuery) return foods;
-
     const q = searchQuery.toLowerCase();
     return foods.filter((food) => food.name?.toLowerCase().includes(q));
   }, [foods, searchQuery]);
@@ -66,12 +73,13 @@ export default function FoodDatabase() {
   }
 
   async function handleToggleAdd(food, isAdded) {
+
+    if (!userId) return; 
+
     const gramsRaw = gramsById[food._id];
     const grams = Number(gramsRaw);
 
-    if (!isAdded) {
-      return;
-    }
+    if (!isAdded) return;
 
     if (!grams || Number.isNaN(grams) || grams <= 0) {
       console.warn("Invalid grams for", food.name, gramsRaw);
@@ -83,6 +91,7 @@ export default function FoodDatabase() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId,
           foodId: food._id,
           grams,
         }),
@@ -90,11 +99,7 @@ export default function FoodDatabase() {
 
       if (!res.ok) {
         const text = await res.text();
-        console.error(
-          "Failed to log food:",
-          res.status,
-          text.slice(0, 200)
-        );
+        console.error("Failed to log food:", res.status, text);
         return;
       }
 
@@ -106,11 +111,11 @@ export default function FoodDatabase() {
     }
   }
 
+  if (!userId) return null;
 
   return (
     <div className="w-full h-full">
       <main className="w-full h-full flex flex-col">
-
         <div className="flex flex-col mb-6 shrink-0">
           <Search
             value={searchQuery}
@@ -121,32 +126,21 @@ export default function FoodDatabase() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {loading && (
-            <p className="text-xs text-brand-grey4">Loading foods…</p>
-          )}
-
-          {!loading && errorMsg && (
-            <p className="text-xs text-red-500">Error: {errorMsg}</p>
-          )}
+          {loading && <p className="text-xs text-brand-grey4">Loading foods…</p>}
+          {!loading && errorMsg && <p className="text-xs text-red-500">Error: {errorMsg}</p>}
 
           {!loading && !errorMsg && (
             <div className="flex flex-col gap-4 pb-4">
               {filteredFoods.length === 0 && foods.length > 0 && (
-                <p className="text-xs text-brand-grey4 text-center">
-                  No matches found for "{searchQuery}"
-                </p>
+                <p className="text-xs text-brand-grey4 text-center">No matches found for "{searchQuery}"</p>
               )}
-
               {foods.length === 0 && (
-                <p className="text-xs text-brand-grey4">
-                  No foods found in the database.
-                </p>
+                <p className="text-xs text-brand-grey4">No foods found in the database.</p>
               )}
 
               {filteredFoods.map((food) => {
                 const Icon = resolveFoodIcon(food.icon);
                 const grams = gramsById[food._id] ?? "";
-
                 const gNum = typeof grams === "number" ? grams : Number(grams) || 0;
 
                 const caloriesScaled = Math.round((food.calories * gNum) / 100);
@@ -164,12 +158,8 @@ export default function FoodDatabase() {
                     carbs={carbsScaled}
                     fat={fatScaled}
                     grams={grams}
-                    onGramsChange={(value) =>
-                      handleGramsChange(food._id, value)
-                    }
-                    onToggleAdd={(isAdded) =>
-                      handleToggleAdd(food, isAdded)
-                    }
+                    onGramsChange={(value) => handleGramsChange(food._id, value)}
+                    onToggleAdd={(isAdded) => handleToggleAdd(food, isAdded)}
                   />
                 );
               })}

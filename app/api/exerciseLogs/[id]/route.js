@@ -3,46 +3,19 @@ import dbConnect from "@/lib/mongodb";
 import ExerciseLog from "@/models/exerciseLog";
 
 export async function PUT(req, { params }) {
-  console.log("------------------------------------------");
-  console.log("PUT REQUEST RECEIVED AT /api/exerciseLogs/[id]");
-
   try {
-    const resolvedParams = await params;
-    console.log("Params resolved:", resolvedParams);
-
-    const { id } = resolvedParams;
-    console.log("ID extracted:", id);
-
-    if (!id) {
-      console.log("Error: No ID found in params");
-      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
-    }
-
-    let body;
-    try {
-      body = await req.json();
-      console.log("Body parsed, exercise count:", body.exercises?.length);
-    } catch (e) {
-      console.log("Error parsing JSON body");
-      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-    }
-
-    console.log("Connecting to DB...");
     await dbConnect();
-    console.log("DB Connected");
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
 
-    console.log(`Attempting to update ID: ${id}`);
-    const existing = await ExerciseLog.findById(id);
-    console.log(existing ? "Document FOUND in DB" : "Document NOT FOUND in DB");
+    if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
 
-    if (!existing) {
-      return NextResponse.json(
-        { error: "Workout not found in DB" },
-        { status: 404 }
-      );
+    const body = await req.json();
+    const { exercises, userId } = body;
+
+    if (!userId) {
+       return NextResponse.json({ error: "Missing userId" }, { status: 401 });
     }
-
-    const { exercises } = body;
 
     const sanitizedExercises = exercises.map((ex) => ({
       ...ex,
@@ -54,21 +27,24 @@ export async function PUT(req, { params }) {
       })),
     }));
 
-    const updated = await ExerciseLog.findByIdAndUpdate(
-      id,
+    const updated = await ExerciseLog.findOneAndUpdate(
+      { _id: id, userId }, 
       { exercises: sanitizedExercises },
       { new: true }
     );
 
-    console.log("Update successful");
-    console.log("------------------------------------------");
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Workout not found or unauthorized" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(updated, { status: 200 });
   } catch (err) {
-    console.error("CRITICAL SERVER ERROR:", err);
-
+    console.error("Server Error:", err);
     return NextResponse.json(
-      { error: "Internal Server Error", details: err.message },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

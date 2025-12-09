@@ -43,7 +43,11 @@ export default function SignUpForm() {
         throw new Error(data.error || "Failed to create account");
       }
 
-      router.push("/login");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("elysia_user_id", data.userId);
+      }
+
+      router.push("/onboarding");
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -52,22 +56,23 @@ export default function SignUpForm() {
   }
 
   return (
+    <div className="w-full rounded-3xl bg-brand-grey2 px-5 py-6 text-white md:px-6 md:py-8">
+      <h2 className="mb-6 text-center text-xl font-semibold md:mb-8 md:text-3xl">
+        Sign Up
+      </h2>
 
-    <div className="w-full h-auto rounded-3xl bg-brand-grey2 p-6 text-white md:p-8">
-      
-      <h2 className="mb-8 text-center text-3xl font-semibold">Sign Up</h2>
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-lg md:gap-10">
-
-        <div className="flex gap-3">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-6 text-sm md:gap-10 md:text-lg"
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-3">
           <div className="flex-1">
             <input
               type="text"
               placeholder="First Name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-
-              className="w-full appearance-none rounded-none border-b border-brand-grey4 bg-transparent py-2 outline-none placeholder:text-brand-grey5 focus:border-brand-purple1 transition-colors"
+              className="w-full border-b border-brand-grey4 bg-transparent pb-1 outline-none placeholder:text-brand-grey5"
             />
           </div>
           <div className="flex-1">
@@ -76,7 +81,7 @@ export default function SignUpForm() {
               placeholder="Last Name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full appearance-none rounded-none border-b border-brand-grey4 bg-transparent py-2 outline-none placeholder:text-brand-grey5 focus:border-brand-purple1 transition-colors"
+              className="w-full border-b border-brand-grey4 bg-transparent pb-1 outline-none placeholder:text-brand-grey5"
             />
           </div>
         </div>
@@ -87,7 +92,7 @@ export default function SignUpForm() {
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full appearance-none rounded-none border-b border-brand-grey4 bg-transparent py-2 outline-none placeholder:text-brand-grey5 focus:border-brand-purple1 transition-colors"
+            className="w-full border-b border-brand-grey4 bg-transparent pb-1 outline-none placeholder:text-brand-grey5"
           />
         </div>
 
@@ -97,7 +102,7 @@ export default function SignUpForm() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full appearance-none rounded-none border-b border-brand-grey4 bg-transparent py-2 outline-none placeholder:text-brand-grey5 focus:border-brand-purple1 transition-colors"
+            className="w-full border-b border-brand-grey4 bg-transparent pb-1 outline-none placeholder:text-brand-grey5"
             required
           />
         </div>
@@ -108,13 +113,13 @@ export default function SignUpForm() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full appearance-none rounded-none border-b border-brand-grey4 bg-transparent py-2 outline-none placeholder:text-brand-grey5 focus:border-brand-purple1 transition-colors"
+            className="w-full border-b border-brand-grey4 bg-transparent pb-1 outline-none placeholder:text-brand-grey5"
             required
           />
         </div>
 
         {error && (
-          <p className="mt-1 text-center text-sm text-red-400">
+          <p className="mt-1 text-[11px] text-red-400">
             {error}
           </p>
         )}
@@ -122,18 +127,18 @@ export default function SignUpForm() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 w-full rounded-full bg-brand-purple1 py-3 text-center text-lg font-semibold uppercase tracking-wide disabled:opacity-60 hover:bg-opacity-90 transition-opacity"
+          className="mt-2 w-full rounded-full bg-brand-purple1 py-2.5 text-center text-sm font-semibold uppercase tracking-wide md:mt-4 md:py-3 md:text-lg disabled:opacity-60"
         >
           {loading ? "Creating..." : "Sign Up"}
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-brand-grey5">
+      <div className="mt-5 text-center text-xs text-brand-grey5 md:mt-6 md:text-sm">
         <p>Already have an Elysia account?</p>
         <button
           type="button"
           onClick={() => router.push("/login")}
-          className="mt-2 text-sm font-medium text-brand-purple1 underline"
+          className="mt-1 text-xs font-medium text-brand-purple1 underline md:mt-2 md:text-sm"
         >
           Sign in
         </button>

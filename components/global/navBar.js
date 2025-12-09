@@ -21,7 +21,7 @@ export default function Nav() {
 
         <Link
           className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors group"
-          href="/dashboard"
+          href="/dashboardTraining"
         >
           <ChartPie className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
           <span className="text-[10px] font-medium">Analytics</span>
@@ -61,10 +61,13 @@ export default function Nav() {
           <span className="text-[10px] font-medium">Data Logs</span>
         </Link>
 
-        <button className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors group">
+        <Link
+          className="flex flex-col items-center justify-center w-16 h-full text-gray-400 hover:text-white transition-colors group"
+          href="/profile"
+        >
           <CircleUser className="w-6 h-6 mb-1 group-hover:-translate-y-0.5 transition-transform" />
           <span className="text-[10px] font-medium">Profile</span>
-        </button>
+        </Link>
       </div>
     </div>
   );

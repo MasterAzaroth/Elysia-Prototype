@@ -11,14 +11,18 @@ const UserProfileSchema = new mongoose.Schema(
     weight: { type: Number, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+
     nutritional_goal: {
       type: String,
       enum: ["bulk", "cut", "maintain", "recomp"],
       required: true,
     },
     nutritional_preference: { type: String, default: "high protein" },
+
     training_focus: { type: String, default: "hybrid" },
     activity_level: { type: Number, min: 1, max: 5, required: true },
+
+    weekly_workout_frequency: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

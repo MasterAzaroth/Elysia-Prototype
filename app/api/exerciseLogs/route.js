@@ -6,8 +6,14 @@ export async function POST(req) {
   try {
     await dbConnect();
 
-    const body = await req.json();
-    const { workoutTitle, date, exercises } = body;
+    const { userId, workoutTitle, date, exercises } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized: Missing userId" },
+        { status: 401 }
+      );
+    }
 
     if (!Array.isArray(exercises) || exercises.length === 0) {
       return NextResponse.json(
@@ -17,6 +23,7 @@ export async function POST(req) {
     }
 
     const doc = await ExerciseLog.create({
+      userId,
       workoutTitle: workoutTitle || "Untitled Workout",
       date: date ? new Date(date) : new Date(),
       exercises: exercises.map((ex) => ({
@@ -45,5 +52,24 @@ export async function POST(req) {
       { error: "Failed to save exercise log" },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(req) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    const logs = await ExerciseLog.find({ userId }).sort({ date: -1 }).lean();
+
+    return NextResponse.json(logs, { status: 200 });
+  } catch (err) {
+    console.error("Failed to fetch logs:", err);
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

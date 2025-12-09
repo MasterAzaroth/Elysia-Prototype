@@ -4,20 +4,15 @@ import dbConnect from "@/lib/mongodb";
 import Food from "@/models/food.js";
 import FoodLog from "@/models/foodLog.js";
 
-const DEMO_USER_ID = "demo-user";
-
 export async function POST(req) {
   try {
     await dbConnect();
+    
+    const { userId, foodId, grams, loggedAt } = await req.json();
 
-    console.log("🧠 Mongoose DB name:", mongoose.connection.name);
-    console.log("🧠 Mongoose URI host:", mongoose.connection.host);
-
-    const { foodId, grams, loggedAt } = await req.json();
-
-    if (!foodId || !grams) {
+    if (!userId || !foodId || !grams) {
       return NextResponse.json(
-        { error: "foodId and grams are required" },
+        { error: "userId, foodId, and grams are required" },
         { status: 400 }
       );
     }
@@ -39,7 +34,7 @@ export async function POST(req) {
     const fat = food.fat * factor;
 
     const log = await FoodLog.create({
-      userId: DEMO_USER_ID,
+      userId,
       food: food._id,
       foodName: food.name,
       grams,
@@ -49,8 +44,6 @@ export async function POST(req) {
       fat,
       loggedAt: ts,
     });
-
-    console.log("✅ Saved FoodLog:", log);
 
     return NextResponse.json(log, { status: 201 });
   } catch (err) {
@@ -68,20 +61,22 @@ export async function GET(req) {
 
     const { searchParams } = new URL(req.url);
     const day = searchParams.get("day");
+    const userId = searchParams.get("userId");
 
-    if (!day) {
+    if (!userId) {
       return NextResponse.json(
-        { error: "day query param (YYYY-MM-DD) is required" },
+        { error: "userId is required" },
         { status: 400 }
       );
     }
 
-    const logs = await FoodLog.find({
-      userId: DEMO_USER_ID,
-      day,
-    }).sort({ loggedAt: 1 });
+    const query = { userId };
 
-    console.log("📦 GET /api/foodLog logs for day:", day, logs.length);
+    if (day) {
+      query.day = day;
+    }
+
+    const logs = await FoodLog.find(query).sort({ loggedAt: 1 });
 
     return NextResponse.json(logs, { status: 200 });
   } catch (err) {
@@ -99,18 +94,23 @@ export async function DELETE(req) {
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
+    const userId = searchParams.get("userId");
 
-    if (!id) {
+    if (!id || !userId) {
       return NextResponse.json(
-        { error: "id query param is required" },
+        { error: "id and userId are required" },
         { status: 400 }
       );
     }
 
-    await FoodLog.findOneAndDelete({
+    const deleted = await FoodLog.findOneAndDelete({
       _id: id,
-      userId: DEMO_USER_ID,
+      userId,
     });
+
+    if (!deleted) {
+      return NextResponse.json({ error: "Log not found or unauthorized" }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err) {
@@ -126,23 +126,23 @@ export async function PATCH(req) {
   try {
     await dbConnect();
 
-    const { id, grams } = await req.json();
+    const { id, grams, userId } = await req.json();
 
-    if (!id || typeof grams !== "number" || grams < 0) {
+    if (!id || typeof grams !== "number" || grams < 0 || !userId) {
       return NextResponse.json(
-        { error: "id and positive numeric grams are required" },
+        { error: "id, userId, and positive grams are required" },
         { status: 400 }
       );
     }
 
     const log = await FoodLog.findOne({
       _id: id,
-      userId: DEMO_USER_ID,
+      userId,
     });
 
     if (!log) {
       return NextResponse.json(
-        { error: "Food log not found" },
+        { error: "Food log not found or unauthorized" },
         { status: 404 }
       );
     }

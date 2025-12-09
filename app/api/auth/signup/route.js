@@ -61,7 +61,7 @@ export async function POST(req) {
       {
         success: true,
         message: "Account created successfully.",
-        userId: user._id,
+        userId: user._id.toString(),
       },
       { status: 201 }
     );

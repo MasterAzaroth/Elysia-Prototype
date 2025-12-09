@@ -1,8 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import OverviewNavbar from "@/components/global/overviewNavbar.js";
 import SummaryCard from "@/components/trackingTraining/summaryCard.js";
-import dbConnect from "@/lib/mongodb";
-import ExerciseLog from "@/models/exerciseLog";
-import Link from "next/link";
 
 const MUSCLE_PRIORITY = {
   Back: 1,
@@ -15,58 +17,60 @@ const MUSCLE_PRIORITY = {
 function categorizeMuscle(muscle) {
   if (!muscle) return null;
   const m = muscle.toLowerCase();
-
   if (m.includes("lat") || m.includes("back")) return "Back";
-
   if (m.includes("chest") || m.includes("pec")) return "Chest";
-
-  if (
-    m.includes("quad") ||
-    m.includes("hamstring") ||
-    m.includes("glute") ||
-    m.includes("calf") ||
-    m.includes("adductor") ||
-    m.includes("abductor") ||
-    m.includes("legs") ||
-    m.includes("leg")
-  ) {
-    return "Legs";
-  }
-
-  if (
-    m.includes("bicep") ||
-    m.includes("tricep") ||
-    m.includes("forearm") ||
-    m.includes("arm")
-  ) {
-    return "Arms";
-  }
-
+  if (m.includes("quad") || m.includes("hamstring") || m.includes("glute") || m.includes("calf") || m.includes("legs") || m.includes("leg")) return "Legs";
+  if (m.includes("bicep") || m.includes("tricep") || m.includes("forearm") || m.includes("arm")) return "Arms";
   if (m.includes("delt") || m.includes("shoulder")) return "Shoulders";
-
   return null;
 }
 
-export default async function OverviewTraining() {
-  await dbConnect();
+export default function OverviewTraining() {
+  const router = useRouter();
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const logs = await ExerciseLog.find({})
-    .sort({ date: -1 })
-    .lean();
+  useEffect(() => {
+
+    const userId = localStorage.getItem("elysia_user_id");
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    async function fetchLogs() {
+      try {
+        const res = await fetch(`/api/exerciseLogs?userId=${userId}`);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setLogs(data);
+        }
+      } catch (err) {
+        console.error("Failed to load logs:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchLogs();
+  }, [router]);
+
+  if (loading) {
+    return <div className="p-8 text-center text-white">Loading workouts...</div>;
+  }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <OverviewNavbar />
       <div className="w-full h-[1px] bg-brand-grey3 my-6" />
 
       <div className="flex flex-col gap-3 px-2 pb-6">
         {logs.length === 0 && (
-          <p className="text-sm text-brand-grey4">No workouts logged yet.</p>
+          <p className="text-sm text-brand-grey4 text-center">No workouts logged yet.</p>
         )}
 
         {logs.map((log) => {
           const title = log.workoutTitle || "Untitled Workout";
-
           const groupedMuscles = new Set();
 
           (log.exercises || []).forEach((ex) => {
@@ -75,7 +79,7 @@ export default async function OverviewTraining() {
           });
 
           const sortedMuscles = Array.from(groupedMuscles).sort(
-            (a, b) => MUSCLE_PRIORITY[a] - MUSCLE_PRIORITY[b]
+            (a, b) => (MUSCLE_PRIORITY[a] || 99) - (MUSCLE_PRIORITY[b] || 99)
           );
 
           const dateObj = log.date ? new Date(log.date) : new Date();
