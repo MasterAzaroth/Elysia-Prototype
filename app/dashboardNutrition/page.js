@@ -31,15 +31,23 @@ export default function DashboardNutritionPage() {
         const userData = await userRes.json();
         const logsData = await logsRes.json();
 
-        if (userData.success) {
+        const userObj = userData?.user || (userData?.success ? userData.user : null);
+        
+        const targets = userObj ? calculateNutritionTargets(userObj) : null;
 
-          const targets = calculateNutritionTargets(userData.user);
-          setData({
-            user: userData.user,
-            logs: Array.isArray(logsData) ? logsData : [],
-            targets
-          });
-        }
+        const rawLogs = Array.isArray(logsData) ? logsData : (logsData.logs || []);
+        const processedLogs = rawLogs.map(log => ({
+            ...log,
+            date: new Date(log.loggedAt || log.createdAt),
+            loggedAt: new Date(log.loggedAt || log.createdAt)
+        }));
+
+        setData({
+          user: userObj,
+          logs: processedLogs,
+          targets
+        });
+        
       } catch (err) {
         console.error("Error loading dashboard:", err);
       } finally {
@@ -99,9 +107,6 @@ export default function DashboardNutritionPage() {
           <WeeklyAdherenceChart logs={data.logs} targets={safeTargets} />
         </div>
 
-        <div className="w-full">
-          <MacroAdherenceCard logs={data.logs} targets={safeTargets} />
-        </div>
       </main>
     </div>
   );

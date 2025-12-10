@@ -84,7 +84,7 @@ export default function CurrentRhythmCard({ onContinue }) {
           <div className="mb-4">
             <div className="mb-4 flex items-center justify-between text-sm font-medium text-gray-400">
               <div className="flex items-center gap-2">
-                Activity Level <Info size={14} className="text-brand-purple1" />
+                Activity Level
               </div>
               <span className="font-bold text-brand-purple1">{activityLevel} / 5</span>
             </div>

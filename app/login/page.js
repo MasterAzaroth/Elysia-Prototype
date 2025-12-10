@@ -18,7 +18,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,11 +30,16 @@ export default function LoginPage() {
         throw new Error(data.error || "Invalid credentials");
       }
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("elysia_user_id", data.userId);
+      if (data.userId) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("elysia_user_id", data.userId);
+
+        }
+        router.push("/overviewNutrition");
+      } else {
+        throw new Error("Login succeeded but no User ID was returned.");
       }
 
-      router.push("/overviewNutrition");
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
