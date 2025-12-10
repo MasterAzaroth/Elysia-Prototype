@@ -22,7 +22,7 @@ function resolveMuscleImage(muscleRaw) {
     case "tear muscle": return "/Muscle/Lower%20Body/Tear%20Muscle.png";
     case "tibialis": return "/Muscle/Lower%20Body/Tibialis.png";
 
-    case "biceps": return "/Muscle/Upper%20Body/Arms/biceps.png";
+    case "biceps": return "/Muscle/Upper%20Body/Arms/Biceps.png";
     case "forearm extensors": return "/Muscle/Upper%20Body/Arms/Forearm%20Extensors.png";
     case "forearm flexors": return "/Muscle/Upper%20Body/Arms/Forearm%20Flexors.png";
     case "triceps": return "/Muscle/Upper%20Body/Arms/Triceps.png";
