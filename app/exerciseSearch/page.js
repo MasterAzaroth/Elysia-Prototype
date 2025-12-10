@@ -82,9 +82,7 @@ function SearchContent() {
 
   const filteredExercises = useMemo(() => {
     if (!searchQuery) return exercises;
-
     const q = searchQuery.toLowerCase();
-
     return exercises.filter((ex) => {
       const name = (ex.Exercise || "").toLowerCase();
       const muscle = (ex.Muscle || "").toLowerCase();
@@ -95,15 +93,19 @@ function SearchContent() {
   function handleExerciseConfirm({ title, muscle, imageSrc, setsCount }) {
     if (!setsCount) return;
 
+    let savedLogId = null;
+
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem(CURRENT_KEY);
 
       let titleFromStorage = "";
       let currentExercises = [];
-
+      
       try {
         if (stored) {
           const parsed = JSON.parse(stored);
+          
+          savedLogId = parsed.originalLogId || null;
 
           if (Array.isArray(parsed)) {
             currentExercises = parsed;
@@ -150,12 +152,17 @@ function SearchContent() {
       const payload = {
         title: titleFromStorage,
         exercises: currentExercises,
+        originalLogId: savedLogId 
       };
 
       window.localStorage.setItem(CURRENT_KEY, JSON.stringify(payload));
     }
 
-    router.push("/trackingTraining");
+    if (savedLogId) {
+      router.push(`/summaryTraining?id=${savedLogId}`);
+    } else {
+      router.push("/trackingTraining");
+    }
   }
 
   return (
@@ -218,7 +225,6 @@ function SearchContent() {
 
 export default function ExerciseSearchPage() {
   return (
-
     <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
       <SearchContent />
     </Suspense>

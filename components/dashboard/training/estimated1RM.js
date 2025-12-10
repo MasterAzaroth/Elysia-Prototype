@@ -48,7 +48,7 @@ export default function Estimated1RM({ logs }) {
             {data.estimated1RM}
             <span className="text-base font-normal ml-1">kg</span>
           </p>
-          <p className="text-xs text-brand-grey5">
+          <p className="text-xs">
             Best estimated 1RM
           </p>
         </div>

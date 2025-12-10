@@ -41,12 +41,13 @@ export default function PhysiologyCard({
                 min={10} max={100} step={1}
                 value={age}
                 onChange={(e) => setAge(parseInt(e.target.value) || 0)}
-                className="w-full border-b border-brand-grey4 bg-transparent pb-1 text-sm outline-none focus:border-brand-purple1"
+
+                className="w-full border-b border-brand-grey4 bg-transparent pb-1 text-sm outline-none focus:border-brand-purple1 transition-colors"
               />
             </div>
             <div className="flex-1">
               <p className="mb-1 text-brand-grey5">Gender</p>
-              <div className="border-b border-brand-grey4 pb-1 focus-within:border-brand-purple1">
+              <div className="border-b border-brand-grey4 pb-1 focus-within:border-brand-purple1 transition-colors">
                 <select
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
@@ -62,7 +63,16 @@ export default function PhysiologyCard({
           <div className="mb-6">
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-gray-300">Height</span>
-              <span className="font-bold text-brand-purple1">{height} cm</span>
+              
+              <div className="flex items-center gap-1 border-b border-brand-grey4 focus-within:border-brand-purple1 transition-colors">
+                <input 
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(Number(e.target.value))}
+                  className="w-12 bg-transparent text-right font-bold text-brand-purple1 outline-none appearance-none m-0 p-0"
+                />
+                <span className="font-bold text-brand-purple1">cm</span>
+              </div>
             </div>
             <input
               type="range"
@@ -76,7 +86,17 @@ export default function PhysiologyCard({
           <div className="mb-2">
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-gray-300">Weight</span>
-              <span className="font-bold text-brand-purple1">{weight.toFixed(1)} kg</span>
+
+              <div className="flex items-center gap-1 border-b border-brand-grey4 focus-within:border-brand-purple1 transition-colors">
+                <input 
+                  type="number"
+                  value={weight}
+                  step={0.5}
+                  onChange={(e) => setWeight(Number(e.target.value))}
+                  className="w-16 bg-transparent text-right font-bold text-brand-purple1 outline-none appearance-none m-0 p-0"
+                />
+                <span className="font-bold text-brand-purple1">kg</span>
+              </div>
             </div>
             <input
               type="range"

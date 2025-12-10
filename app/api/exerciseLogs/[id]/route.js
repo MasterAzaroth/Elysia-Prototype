@@ -29,7 +29,7 @@ export async function PUT(req, { params }) {
 
     const updated = await ExerciseLog.findOneAndUpdate(
       { _id: id, userId }, 
-      { exercises: sanitizedExercises },
+      { exercises: sanitizedExercises, workoutTitle: body.workoutTitle },
       { new: true }
     );
 
@@ -43,6 +43,38 @@ export async function PUT(req, { params }) {
     return NextResponse.json(updated, { status: 200 });
   } catch (err) {
     console.error("Server Error:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req, { params }) {
+  try {
+    await dbConnect();
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
+
+    const deleted = await ExerciseLog.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: "Workout not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Workout deleted successfully" },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("Delete Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

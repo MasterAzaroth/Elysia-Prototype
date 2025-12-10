@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { computeMuscleSetDistributionLast8Weeks } from "@/lib/trainingAnalytics";
 import {
   ResponsiveContainer,
@@ -12,64 +13,102 @@ import {
   CartesianGrid,
 } from "recharts";
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-neutral-900 border border-white/10 p-3 rounded-xl shadow-xl">
+        <p className="text-white font-semibold text-xs mb-2">{label}</p>
+        <div className="flex flex-col gap-1">
+          {payload.map((entry, index) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <div 
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: entry.fill }}
+              />
+              <span className="text-gray-300">
+                {entry.name}: <span className="text-white font-medium">{entry.value}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function MuscleDistribution({ logs }) {
-  const data = computeMuscleSetDistributionLast8Weeks(logs);
+
+  const data = useMemo(() => computeMuscleSetDistributionLast8Weeks(logs), [logs]);
 
   return (
-    <div className="bg-brand-grey2 rounded-3xl p-4 flex flex-col gap-3">
+    <div className="bg-brand-grey2 rounded-3xl p-4 flex flex-col gap-3 h-full">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Volume by Muscle</h2>
         <span className="text-xs text-brand-grey5">
-          Avg vs last week · sets
+          Sets: Last Week vs 8-Week Avg
         </span>
       </div>
 
       {data.length === 0 ? (
-        <p className="text-sm text-brand-grey5">
-          No sets logged in the last 8 weeks.
-        </p>
+        <div className="flex-1 flex items-center justify-center min-h-[200px]">
+          <p className="text-sm text-brand-grey5">
+            No data available for the last 8 weeks.
+          </p>
+        </div>
       ) : (
         <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              margin={{ left: -20, right: 10, top: 10, bottom: 10 }}
+              margin={{ left: -25, right: 0, top: 10, bottom: 0 }}
+              barGap={2}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="#ffffff" 
+                opacity={0.05} 
+                vertical={false} 
+              />
+              
               <XAxis
                 dataKey="muscle"
                 tick={{ fontSize: 10, fill: "#9ca3af" }}
+                axisLine={false}
+                tickLine={false}
+                interval={0}
               />
-              <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#181818",
-                  border: "1px solid #2d2d2d",
-                  borderRadius: "12px",
-                  fontSize: "12px",
-                }}
-                labelStyle={{ color: "#e5e7eb" }}
-                formatter={(v, name) => [`${v} sets`, name]}
+              
+              <YAxis 
+                tick={{ fontSize: 10, fill: "#9ca3af" }} 
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
               />
+              
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'white', opacity: 0.05 }} />
+              
               <Legend
-                wrapperStyle={{ fontSize: 11 }}
-                formatter={(value) =>
-                  value === "avgSets" ? "Avg / week" : "Last week"
-                }
+                verticalAlign="top"
+                align="right"
+                iconType="circle"
+                wrapperStyle={{ fontSize: 10, paddingBottom: 10 }}
               />
+
               <Bar
                 dataKey="avgSets"
-                name="Avg / week"
-                radius={[4, 4, 0, 0]}
-                barSize={16}
-                fill="#7D5BF8"
+                name="Avg / Week"
+                fill="#4b5563"
+                radius={[4, 4, 4, 4]}
+                barSize={8}
               />
+
               <Bar
                 dataKey="lastWeekSets"
-                name="Last week"
-                radius={[4, 4, 0, 0]}
-                barSize={16}
-                fill="#A78BFA"
+                name="Last Week"
+                fill="#7D5BF8"
+                radius={[4, 4, 4, 4]}
+                barSize={8}
               />
             </BarChart>
           </ResponsiveContainer>

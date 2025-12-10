@@ -57,11 +57,11 @@ export default function DashboardTrainingPage() {
         </div>
 
         <div className="w-full h-auto flex flex-col gap-4">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="w-full md:w-1/2 aspect-square md:aspect-auto h-auto min-h-[250px]">
+          <div className="flex gap-2">
+            <div className="w-1/2 aspect-square">
               <Estimated1RM logs={logs} />
             </div>
-            <div className="w-full md:w-1/2 aspect-square md:aspect-auto h-auto min-h-[250px]">
+            <div className="w-1/2 aspect-square">
               <StrongestLift logs={logs} />
             </div>
           </div>

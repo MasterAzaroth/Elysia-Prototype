@@ -17,6 +17,7 @@ export default function TrackingTrainingCard({
 }) {
   return (
     <div className="w-full h-auto bg-brand-grey2 p-3 rounded-2xl flex flex-col gap-3">
+
       <div className="flex mb-1 items-center gap-3">
         <img
           src={imageSrc}
@@ -34,7 +35,7 @@ export default function TrackingTrainingCard({
           onClick={onDeleteExercise}
           className="w-10 h-10 bg-brand-purple1 rounded-full p-2 flex items-center justify-center active:scale-95"
         >
-          <Trash2 />
+          <Trash2 className="text-white" />
         </button>
       </div>
 
@@ -58,10 +59,9 @@ export default function TrackingTrainingCard({
       <button
         type="button"
         onClick={onAddSet}
-        className="mt-1 self-start flex items-center gap-2 px-3 py-1 rounded-full bg-brand-purple1 text-sm active:scale-95"
+        className="w-full py-2 mt-1 rounded-full border border-dashed border-brand-grey4 text-brand-grey4 text-xs hover:border-brand-purple1 hover:text-brand-purple1 transition flex items-center justify-center gap-1"
       >
-        <Plus size={16} />
-        <span>Add Set</span>
+        <Plus size={14} /> Add Set
       </button>
     </div>
   );
