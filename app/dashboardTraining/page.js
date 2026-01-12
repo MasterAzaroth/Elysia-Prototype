@@ -57,14 +57,14 @@ export default function DashboardTrainingPage() {
         </div>
 
         <div className="w-full h-auto flex flex-col gap-4">
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <div className="w-1/2 aspect-square">
               <Estimated1RM logs={logs} />
             </div>
             <div className="w-1/2 aspect-square">
               <StrongestLift logs={logs} />
             </div>
-          </div>
+          </div> */}
 
           <div className="md:col-span-2">
             <VolumeOverTime logs={logs} />

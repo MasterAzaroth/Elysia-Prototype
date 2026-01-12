@@ -24,9 +24,11 @@ export default function VolumeOverTime({ logs }) {
       </div>
 
       {data.length === 0 ? (
-        <p className="text-sm text-brand-grey5">
-          No training volume in the last 8 weeks.
-        </p>
+        <div className="flex-1 flex items-center justify-center min-h-[200px]">
+          <p className="text-sm text-brand-grey5">
+            No data available for the last 8 weeks.
+          </p>
+        </div>
       ) : (
         <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">

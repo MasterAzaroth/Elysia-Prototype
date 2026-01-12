@@ -132,7 +132,7 @@ export default function DashboardConsistencyPage() {
           targets={data.targets}
         />
 
-        <WorkoutFrequencyChart exerciseLogs={data.exerciseLogs} />
+        {/* <WorkoutFrequencyChart exerciseLogs={data.exerciseLogs} /> */}
 
         <ConsistencyCalendar
           exerciseLogs={data.exerciseLogs}
